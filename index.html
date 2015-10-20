@@ -2,97 +2,84 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title></title>
-	<link rel="stylesheet" href="css/index.css"> 
+	<title>Lest Talk</title>
+	<link rel="stylesheet" type="text/css" href="css/chat.css">
+	
 </head>
 <body>
-	<div class="chat">
-		<input type="text" class="chat-name" placeholder="Informe seu Nome">
-		<div class="chat-messages">
-			
-		</div>
-		<textarea placeholder="Digite sua mensagem - Enter para enviar!"></textarea>
-		<div class="chat-status">Status <span>Online</span></div>
+	<style type="text/css">
+		.container {
+			margin-left: auto;
+			margin-right: auto;
+			width: 400px;
+			height: 400px;
+			margin-top: 250px;
+			padding: 10px;
+		}
+
+		.user-name{
+			padding: 10px;
+			border: 1px solid #bbb;
+			outline: none;
+			border-radius: 4px;
+			color: #fff;
+			background-color: #4F2F4F;
+			font-weight: bolder;
+		}
+		h4{
+			color: #4F2F4F;
+		}
+		button{
+			padding: 10px;
+			border-radius: 8px;			 
+			color: #4F2F4F;
+		}
+
+	</style>
+	<div class="container">
+		<h4>Informe um nome de usuário</h4>
+
+	<input type="text" placeholder="Nome de usuário" class="user-name" id="user" />
+
+	<button id="btn">entrar</button>
+
 	</div>
-
-	<script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
-
+	
+	
 	<script>
-	(function () {
-		var getNode = function (s) {
-			return document.querySelector(s);
-		},
-		// Get required nodes
-		messages = getNode('.chat-messages'),
-		status = getNode('.chat-status span'),
-		textarea = getNode('.chat textarea'),
-		chatName = getNode('.chat-name'),
-		statusDefault = status.textContent,
+			var count = 0;
+		    var btn = document.querySelector('#btn');
+			btn.disabled = true;	
+			var userInput = document.querySelector('#user');
+			userInput.addEventListener('keypress', function (event) {
 
-		setStatus = function (s) {
-			status.textContent = s;
+				if(event.which != 13 || event.which != 8){
+					count += 1;
+				}
 
-			if (s !== statusDefault) {
-				var delay = setTimeout(function () {
-					setStatus(statusDefault);
-					clearInterval(delay);
-				}, 3000);
-			};
-		};
+				
+				console.log(count);
+				if (count >=4) {
+					
+					btn.disabled = false;
 
+				
+					
+				};	
 		
-
-		try {
-			var socket = io.connect('http://127.0.0.1:8080');
-		} catch(e) {
-			// Set status to warn user
-		}
-
-		if(socket !== undefined){
-			// Listen for output
-			socket.on('output', function (data) {
-				if (data.length) {
-					// Loop through results
-					for (var x = 0; x < data.length; x++) {
-						var message = document.createElement('div');
-						message.setAttribute('class', 'chat-message');
-						message.textContent = data[x].name + ': ' + data[x].message;
-
-						//Append
-						messages.appendChild(message);
-					//	messages.insertBefore(message, messages.firstChild)
-					}
-				}
-			})
-
-			// Listen for a status
-			socket.on('status', function (data) {
-				setStatus((typeof data === 'object') ? data.message : data);
-
-				if (data.clear === true) {
-					textarea.value = '';
-				}
 			});
 
-			// Listen for keydown
-			textarea.addEventListener('keydown', function (event) {
-				var self = this,
-					name = chatName.value;
-
-
-					if (event.which === 13 && event.shiftKey === false) {
-						socket.emit('input',{
-							name : name,
-							message : self.value 
-						});
-
-						event.preventDefault();
-					}
+			btn.addEventListener('click', function (event) {
+			user = document.querySelector('#user').value;	
+			window.location.href = 'chat.html?user='+user;
+		    console.log(user);
+				
 			});
-		}
-	})();
+
 	</script>
+
+
+
+
 </body>
-</html>
-
-
+</html> 
