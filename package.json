@@ -1,0 +1,25 @@
+{
+  "name": "nodejs-chat",
+  "version": "1.0.0",
+  "description": "chat",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "^1.3.7",
+    "mongodb": "^2.0.45"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taikio/nodejs-chat.git"
+  },
+  "author": "welker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taikio/nodejs-chat/issues"
+  },
+  "homepage": "https://github.com/taikio/nodejs-chat#readme"
+}
