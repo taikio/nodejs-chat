@@ -1,64 +1,51 @@
+// Carrega dependência do banco de dados mongo DB
 var mongo = require('mongodb').MongoClient,
-    http  = require('http'),
-    app =  http.createServer(listener),
-	  client = require('socket.io')(app),
-    fs = require('fs');
+	// Carrega dependência da biblioteca express (responsável por gerenciar as rotas)
+    express = require('express'),
+    app =  express();
+    // Carrega a dependência da biblioteca nativa HTTP para permitir requisições
+    http = require('http').createServer(app),
+    // Carrega a dependência da biblioteca socket.io (implementação de socket usada na aplicação)
+	client = require('socket.io'),
+	client = client.listen(http),
+	// Configura o servidor para escutar a porta 8080, ou a porta padrão do sistema de hospedagem
+	http.listen(process.env.PORT || 8080);
+    // usa o método static() passando como parâmetro o nome do diretório onde estão os arquivos html
+	app.use(express.static('views'));
+   
 
-app.listen(process.env.PORT || 8080);
-
-
-function listener (req, res) {
-  var url =  req.url;
-  res.sendStatus = 200;
-  if(/chat.html/.test(url) || url == '/'){
-    res.setHeader("Content-Type", "text/html");
-    var file = fs.readFileSync("./chat.html");
-    res.end(file);
-  }else if(/\.css/.test(url)) {
-    res.setHeader("Content-Type", "text/css");
-    var css = fs.readFileSync("./css/chat.css");
-    res.end(css);
-  }else if(/\.js/.test(url)) {
-    res.setHeader("Content-Type", "aplication/javascript");
-    var js = fs.readFileSync("./js/app.js");
-    res.end(js);
-  }else {
-    res.sendStatus = 404; 
-    res.end("Link não existe");
-  }
-
-}
+	// Conecta no banco de dados hospedado no serviço Mongolab
 	mongo.connect('mongodb://mongodb:3101@ds043694.mongolab.com:43694/chat', function (err, db) {
 		if(err) throw err;
-		
+		// Aguarda que um socket cliente se conecte
  		client.on('connection', function (socket) {
 			console.log('Someone has connected');
 			console.log(socket.id);
-
+			// seleciona a coleção responsável por armazenar as mensagens no banco
 			var col = db.collection('messages'),
 				sendStatus = function (s) {
 					socket.emit('status', s);
 				};
-			// Emit all messages
+			// Envia todas as mensagens armazenadas para a tela do chat
 			col.find().limit(100).sort({_id : 1}).toArray(function (err, res) {
 				if(err) throw err;
 				socket.emit('output', res);
 			});
 
 
-			// Wait for input
+			// Espera que o cliente emita um evento do tipo 'input' e recebe os dados digitados
 			socket.on('input', function (data) {
 	
 				var name = data.name,
 					message = data.message,
 					whitespacePattern = /^\s*$/;
-
+					// Testa o nome de usuário e a mensagem recebida para evitar que chegue algo vazio
 				if (whitespacePattern.test(name) || whitespacePattern.test(message)) {
 					sendStatus('Name and message is required.');
 				} else{
-					
+					// Se não tiver nenhum campo vazio insere no banco de dados
 					col.insert({name : name, message : message}, function () {
-						// Emit latest message to all users
+						// Envia a última mensagem gravada no banco para a tela do chat
 						client.emit('output', [data]);
 
 						sendStatus({
